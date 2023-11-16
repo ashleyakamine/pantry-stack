@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import {InventoryPage} from './pages/InventoryPage.js';
-import {RecipePage} from './pages/RecipePage.js';
+import { InventoryPage}  from './pages/InventoryPage.js';
+import { RecipePage } from './pages/RecipePage.js';
 
 function App() {
   return (
