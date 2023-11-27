@@ -1,16 +1,19 @@
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import { InventoryPage}  from './pages/InventoryPage.js';
-import { RecipePage } from './pages/RecipePage.js';
+import { Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import {InventoryPage} from './pages/InventoryPage';
+import {RecipePage} from './pages/RecipePage';
+import {HomePage} from './pages/HomePage';
 
 function App() {
   return (
-    <div>
+    <>
+      <Header />
       <Routes>
-        <Route exact path="/" element={<InventoryPage />} />
-        <Route exact path="/RecipePage" element={<RecipePage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/recipe" element={<RecipePage />} />
       </Routes>
-    </div>
+    </>
   );
 }
 
