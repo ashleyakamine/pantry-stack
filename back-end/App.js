@@ -28,9 +28,18 @@ const typeDefs = gql`
     stock_date: String!
   }
 
+  type Recipe {
+    title: String!
+    link: String!
+    ingredients: String!
+  }
+
   type Query {
     inventoryItems: [InventoryItem!]!
+    recipeList: [Recipe!]! 
   }
+
+
 `;
 
 const resolvers = {
@@ -41,11 +50,16 @@ const resolvers = {
 
       return rows;
     },
+    recipeList: async () => {
+      const query = 'SELECT * FROM plu_pantry.recipes limit 10';
+      const [rows] = await connection.promise().query(query);
+
+      return rows;
+    },
   },
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });
-
 
 async function startServer() {
   await server.start();
