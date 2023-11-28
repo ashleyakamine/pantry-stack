@@ -4,6 +4,7 @@ import {InventoryPage} from './pages/InventoryPage';
 import {RecipePage} from './pages/RecipePage';
 import {HomePage} from './pages/HomePage';
 
+
 function App() {
   return (
     <>

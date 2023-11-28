@@ -14,7 +14,7 @@ file.close()
 try:
     reservationConnection = mysql.connector.connect(
         user='root',
-        password= '*******', #enter password here
+        password= '***', #enter password here
         host='localhost',
         database='plu_pantry'
     )
