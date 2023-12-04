@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -16,6 +16,10 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LinearProgress from '@mui/material/LinearProgress';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import Grid from '@mui/material/Grid';
 import {GET_INVENTORY, UPDATE_INVENTORY_ITEM, DELETE_INVENTORY_ITEM, ADD_INVENTORY_ITEM } from '../gql/gql.js';
 
 export function InventoryPage() {
@@ -26,6 +30,9 @@ export function InventoryPage() {
   const [deleteInventoryItem] = useMutation(DELETE_INVENTORY_ITEM);
   const [addInventoryItem] = useMutation(ADD_INVENTORY_ITEM);
 
+  const [sortField, setSortField] = useState('brand');
+  const [sortDirection, setSortDirection] = useState('asc'); 
+
   const [searchQuery, setSearchQuery] = useState('');
   const [editableRows, setEditableRows] = useState([]);
   const [editMode, setEditMode] = useState({});
@@ -33,6 +40,13 @@ export function InventoryPage() {
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const isAddPopoverOpen = Boolean(addAnchorEl);
   const addPopoverId = isAddPopoverOpen ? 'add-popover' : undefined;
+  const sortOptions = [
+    { value: 'brand', label: 'Brand' },
+    { value: 'simple_name', label: 'Simple Name' },
+    { value: 'quantity', label: 'Quantity' },
+    { value: 'stock_date', label: 'Stock Date' },
+    { value: 'exp_date', label: 'Exp. Date' },
+  ];  
   const [newItem, setNewItem] = useState({
     brand: '',
     simple_name: '',
@@ -41,20 +55,28 @@ export function InventoryPage() {
     exp_date: ''
   });
 
-  const [showLoading, setShowLoading] = useState(false);
-
-  useEffect(() => {
-    let timer;
+  const sortedEditableRows = useMemo(() => {
+    return [...editableRows].sort((a, b) => {
+      let valueA = a[sortField];
+      let valueB = b[sortField];
   
-    if (loading) {
-      timer = setTimeout(() => setShowLoading(true), 500); 
-    } else {
-      setShowLoading(false);
-    }
+      // Convert to appropriate types
+      if (sortField === 'quantity') {
+        valueA = Number(valueA);
+        valueB = Number(valueB);
+      } else if (sortField === 'stock_date' || sortField === 'exp_date') {
+        valueA = new Date(valueA);
+        valueB = new Date(valueB);
+      }
   
-    return () => clearTimeout(timer);
-  }, [loading]);  
-
+      // Sort logic
+      if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+      if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [editableRows, sortField, sortDirection]);
+  
+  
   
   useEffect(() => {
     if (data && data.inventoryItems) {
@@ -147,13 +169,12 @@ export function InventoryPage() {
     }
   };
   
-
   const handleNewItemChange = (e) => {
     console.log(e); 
     const { name, value } = e.target;
     setNewItem({ ...newItem, [name]: value });
   };
-  
+
   const convertDateFormat = (dateStr) => {
     if (!dateStr) return '';
   
@@ -256,12 +277,32 @@ export function InventoryPage() {
               <TableCell align="right">Quantity</TableCell>
               <TableCell align="right">Stock Date</TableCell>
               <TableCell align="right">Exp. Date</TableCell>
-              <TableCell align="right"></TableCell>
-              <TableCell> </TableCell>
+              <TableCell align="right" sx={{ width: '250px' }}>
+              <Grid container justifyContent="flex-end" alignItems="center" spacing={1}>
+                <Grid item>
+                  <InputLabel id="sort-by-label">Sort By</InputLabel>
+                </Grid>
+                <Grid item>
+                  <Select
+                    labelId="sort-by-label"
+                    value={sortField}
+                    onChange={(e) => setSortField(e.target.value)}
+                    alignItems="right"
+                  >
+                    {sortOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value} >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+              </Grid>
+              </TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-        {editableRows
+        {sortedEditableRows
           .filter(item =>
             (item.brand?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
             (item.simple_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()))
@@ -351,8 +392,6 @@ export function InventoryPage() {
                     </Button>
                   </Typography>
                 </Popover>
-              </TableCell>
-              <TableCell>
                 <Button
                   onClick={() => handleDelete(item.id)}
                   color="alert"
