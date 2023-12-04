@@ -43,11 +43,12 @@ const typeDefs = gql`
   scalar Date
 
   type InventoryItem {
+    id: ID!
     brand: String!
     simple_name: String
-    exp_date: Date
-    quantity: Int!
+    quantity: Int
     stock_date: Date
+    exp_date: Date
   }
 
   type Recipe {
@@ -57,7 +58,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    updateInventoryItem(brand: String!, simple_name: String, quantity: Int, exp_date: Date, stock_date: Date): InventoryItem
+    updateInventoryItem(id: ID!, brand: String!, simple_name: String, quantity: Int, exp_date: Date, stock_date: Date): InventoryItem
   }
 
   type Query {
@@ -88,23 +89,23 @@ const resolvers = {
   },
 
   Mutation: {
-    updateInventoryItem: async (_, { brand, simple_name, quantity, exp_date, stock_date }) => {
-      // Construct the SQL query for updating
+    updateInventoryItem: async (_, { id, brand, simple_name, quantity, exp_date, stock_date }) => {
       const query = `
         UPDATE plu_pantry.inventory
-        SET simple_name = ?, quantity = ?, exp_date = ?, stock_date = ?
-        WHERE brand = ?
+        SET brand = ?, simple_name = ?, quantity = ?, exp_date = ?, stock_date = ?
+        WHERE id = ?
       `;
-      const values = [simple_name, quantity, exp_date, stock_date, brand];
-
+      const values = [brand, simple_name, quantity, exp_date, stock_date, id];
+  
       try {
         await connection.promise().query(query, values);
-        return { brand, simple_name, quantity, exp_date, stock_date };
+        return { id, brand, simple_name, quantity, exp_date, stock_date };
       } catch (error) {
         throw new ApolloError('Failed to update the inventory item: ' + error.message);
       }
     },
-  },
+  },  
+  
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });
