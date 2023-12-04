@@ -1,0 +1,83 @@
+h1, h2, p{
+    font-family: monospace;
+}
+h2{
+    font-size: 2em;
+    text-decoration: underline;
+}
+p{
+    font-size: 16px;
+}
+
+.PLU{
+    display: flex;
+    justify-content: center;
+    margin:20px;
+    background-color: #FFF5B5;
+}
+
+#title{
+    color:gold;
+    font-size: 4em;
+    background-color: black;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 6px solid gold;
+}
+
+.about{
+    background-color: rgb(240, 240, 240);
+    padding: 20px;
+    margin: 10px;
+}
+
+.about h2{
+    font-size: 32px;
+}
+
+.about p{
+    font-size: 18px;
+}
+
+.group{
+    display: grid;
+    grid-template-columns: auto, auto;
+}
+#one{
+    overflow: hidden;
+    margin: 20px;
+    grid-column: 1;
+
+}
+#one img, #two img {
+    object-fit: contain;
+    width: 100%; 
+    display: block;
+}
+
+
+.ours{
+    background-color: rgb(240, 240, 240);
+    padding: 20px;
+    margin: 10px;
+    grid-column: 2;
+}
+
+.group2{
+    display: grid;
+    grid-template-columns: auto, auto;
+}
+
+.mission, .location, .more{
+    background-color: rgb(240, 240, 240);
+    padding: 20px;
+    margin: 10px;
+    grid-column: 1;
+}
+
+#two{
+    grid-column: 2;
+    grid-row: 1/4;
+    margin: 20px;
+} 
+
