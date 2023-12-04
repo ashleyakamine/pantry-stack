@@ -6,7 +6,7 @@ const app = express();
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '********',
+  password: 'Lahainagirls21!',
   database: 'plu_pantry',
 });
 
@@ -58,7 +58,23 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    updateInventoryItem(id: ID!, brand: String!, simple_name: String, quantity: Int, exp_date: Date, stock_date: Date): InventoryItem
+    updateInventoryItem (
+      id: ID!,
+      brand: String!, 
+      simple_name: String, 
+      quantity: Int, 
+      exp_date: Date, 
+      stock_date: Date ) : InventoryItem
+
+    addInventoryItem (
+      brand: String!, 
+      simple_name: String, 
+      quantity: Int, 
+      exp_date: Date, 
+      stock_date: Date ) : InventoryItem
+
+    deleteInventoryItem(
+      id: ID! ) : Boolean
   }
 
   type Query {
@@ -102,6 +118,33 @@ const resolvers = {
         return { id, brand, simple_name, quantity, exp_date, stock_date };
       } catch (error) {
         throw new ApolloError('Failed to update the inventory item: ' + error.message);
+      }
+    },
+    addInventoryItem: async (_, { brand, simple_name, quantity, exp_date, stock_date }) => {
+      const query = `
+        INSERT INTO plu_pantry.inventory (brand, simple_name, quantity, exp_date, stock_date)
+        VALUES (?, ?, ?, ?, ?)
+      `;
+      const values = [brand, simple_name, quantity, exp_date, stock_date];
+    
+      try {
+        const [result] = await connection.promise().execute(query, values);
+        const insertedId = result.insertId;  
+        return { id: insertedId, brand, simple_name, quantity, exp_date, stock_date };
+      } catch (error) {
+        throw new ApolloError('Failed to add the inventory item: ' + error.message);
+      }
+    },
+    deleteInventoryItem: async (_, { id }) => {
+      const query = `
+        DELETE FROM plu_pantry.inventory
+        WHERE id = ?
+      `;
+      try {
+        await connection.promise().execute(query, [id]);
+        return true;
+      } catch (error) {
+        return new ApolloError('Failed to delete the inventory item: ' + error.message);
       }
     },
   },  

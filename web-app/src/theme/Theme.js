@@ -5,6 +5,12 @@ export const theme = createTheme({
     primary: {
       main: '#000000', 
     },
+    secondary: {
+      main: '#FFEBA2',
+    },
+    alert: {
+      main: '#c20202', 
+    },
     components: {
       MuiOutlinedInput: {
         styleOverrides: {

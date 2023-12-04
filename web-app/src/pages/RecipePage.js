@@ -8,6 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TablePagination from '@mui/material/TablePagination';
+import LinearProgress from '@mui/material/LinearProgress';
 
 // GraphQL query
 const GET_RECIPES = gql`
@@ -26,7 +27,7 @@ export function RecipePage() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <LinearProgress />;
   if (error) return <p>Error: {error.message}</p>;
 
   const handleChangePage = (event, newPage) => {
