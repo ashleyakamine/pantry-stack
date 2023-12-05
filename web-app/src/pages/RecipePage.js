@@ -12,20 +12,9 @@ import LinearProgress from '@mui/material/LinearProgress';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
-
-// GraphQL query
-const GET_RECIPES = gql`
-  query GetRecipes {
-    recipeList{ 
-      title
-      link
-      ingredients
-    }
-  }
-`;
+import {GET_RECIPES}  from '../gql/gql.js';
 
 export function RecipePage() {
-  // Execute the query using useQuery
   const { loading, error, data } = useQuery(GET_RECIPES);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -53,8 +42,6 @@ export function RecipePage() {
     });
   };
   
-
-  // Render the data
   return (
     <div style={{ paddingTop: '20px' }}>
       { !loading && (

@@ -24,12 +24,21 @@ import Alert from '@mui/material/Alert';
 import {GET_INVENTORY, UPDATE_INVENTORY_ITEM, DELETE_INVENTORY_ITEM, ADD_INVENTORY_ITEM } from '../gql/gql.js';
 
 export function InventoryPage() {
+
+  /****************************************/
+  // QUERY & MUTATIONS
+  /****************************************/
+
   const { loading, error, data } = useQuery(GET_INVENTORY, {
     fetchPolicy: 'network-only', 
   });  
   const [updateInventoryItem] = useMutation(UPDATE_INVENTORY_ITEM);
   const [deleteInventoryItem] = useMutation(DELETE_INVENTORY_ITEM);
   const [addInventoryItem] = useMutation(ADD_INVENTORY_ITEM);
+
+  /****************************************/
+  // INISTALIZATION
+  /****************************************/
 
   const [sortField, setSortField] = useState('brand');
   const [sortDirection, setSortDirection] = useState('asc'); 
@@ -90,6 +99,17 @@ export function InventoryPage() {
   
   const open = Boolean(anchorPosition);
   const id = open ? 'simple-popover' : undefined;
+
+  const convertDateFormat = (dateStr) => {
+    if (!dateStr) return '';
+  
+    const [month, day, year] = dateStr.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+
+  /****************************************/
+  // HANDLES
+  /****************************************/
 
   const handleClick = (event, itemId) => {
     const position = { top: window.innerHeight / 2, left: window.innerWidth / 2 };
@@ -181,7 +201,6 @@ export function InventoryPage() {
     }
   };
   
-  
   const handleNewItemChange = (e) => {
     console.log(e); 
     const { name, value } = e.target;
@@ -192,13 +211,6 @@ export function InventoryPage() {
     if (errorMessage) {
       setErrorMessage('');
     }
-  };
-
-  const convertDateFormat = (dateStr) => {
-    if (!dateStr) return '';
-  
-    const [month, day, year] = dateStr.split('/');
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   };
   
   return (

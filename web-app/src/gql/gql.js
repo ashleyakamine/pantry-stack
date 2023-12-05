@@ -45,3 +45,13 @@ mutation AddInventoryItem($brand: String!, $simple_name: String, $quantity: Int,
   }
 }
 `;
+
+export const GET_RECIPES = gql`
+  query GetRecipes {
+    recipeList{ 
+      title
+      link
+      ingredients
+    }
+  }
+`;
