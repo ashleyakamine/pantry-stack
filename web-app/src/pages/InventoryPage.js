@@ -20,6 +20,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
 import {GET_INVENTORY, UPDATE_INVENTORY_ITEM, DELETE_INVENTORY_ITEM, ADD_INVENTORY_ITEM } from '../gql/gql.js';
 
 export function InventoryPage() {
@@ -32,7 +33,7 @@ export function InventoryPage() {
 
   const [sortField, setSortField] = useState('brand');
   const [sortDirection, setSortDirection] = useState('asc'); 
-
+  const [errorMessage, setErrorMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [editableRows, setEditableRows] = useState([]);
   const [editMode, setEditMode] = useState({});
@@ -60,7 +61,6 @@ export function InventoryPage() {
       let valueA = a[sortField];
       let valueB = b[sortField];
   
-      // Convert to appropriate types
       if (sortField === 'quantity') {
         valueA = Number(valueA);
         valueB = Number(valueB);
@@ -69,13 +69,11 @@ export function InventoryPage() {
         valueB = new Date(valueB);
       }
   
-      // Sort logic
       if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
       if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
   }, [editableRows, sortField, sortDirection]);
-  
   
   
   useEffect(() => {
@@ -144,6 +142,11 @@ export function InventoryPage() {
   };
 
   const handleAddNewItem = async () => {
+    if (!newItem.brand.trim()) {
+      setErrorMessage('Error: Brand name is required.');
+      return;
+    }
+
     try {
       const { data } = await addInventoryItem({
         variables: {
@@ -154,9 +157,9 @@ export function InventoryPage() {
           exp_date: newItem.exp_date
         },
       });
-
+  
       setEditableRows([...editableRows, data.addInventoryItem]);
-
+  
       setNewItem({
         brand: '',
         simple_name: '',
@@ -164,15 +167,31 @@ export function InventoryPage() {
         stock_date: '',
         exp_date: ''
       });
+      setErrorMessage(''); 
     } catch (error) {
-      console.error('Error adding new item:', error);
+      let errorMsg = 'Error adding new item: ';
+      if (error.graphQLErrors?.length > 0) {
+        error.graphQLErrors.forEach((err) => {
+          errorMsg += err.message + ' ';
+        });
+      } else {
+        errorMsg += error.message;
+      }
+      setErrorMessage(errorMsg);
     }
   };
+  
   
   const handleNewItemChange = (e) => {
     console.log(e); 
     const { name, value } = e.target;
     setNewItem({ ...newItem, [name]: value });
+  };
+
+  const handlePageClick = () => {
+    if (errorMessage) {
+      setErrorMessage('');
+    }
   };
 
   const convertDateFormat = (dateStr) => {
@@ -183,96 +202,119 @@ export function InventoryPage() {
   };
   
   return (
-    <div>
+    <div onClick={handlePageClick} style={{ paddingTop: '12px' }}>
+     <Grid container spacing={1} alignItems="center" justifyContent="space-between">
+      <Grid item xs={10} sm={8} md={6}>
+        <TextField
+          label="Search Inventory"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          fullWidth
+        />
+      </Grid>
+      <Grid item style={{ paddingRight: '90px' }}>
+        <Button
+          aria-describedby={addPopoverId}
+          variant="contained"
+          color="secondary"
+          onClick={(e) => setAddAnchorEl(e.currentTarget)}
+        >
+          <AddIcon />
+        </Button>
+      </Grid>
+    </Grid>
+    <Popover
+      id={addPopoverId}
+      open={isAddPopoverOpen}
+      anchorEl={addAnchorEl}
+      onClose={() => setAddAnchorEl(null)}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'center',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'center',
+      }}
+    >
+      {errorMessage && (
+        <Alert severity="error" onClose={() => setErrorMessage('')}>
+          {errorMessage}
+        </Alert>
+      )}
+      <Typography sx={{ p: 2 }}>
+      <TextField
+        name="brand"
+        label="Brand"
+        value={newItem.brand}
+        onChange={handleNewItemChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        name="simple_name"
+        label="Simple Name"
+        value={newItem.simple_name}
+        onChange={handleNewItemChange} 
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        name="quantity"
+        type="number"
+        label="Quantity"
+        value={newItem.quantity}
+        onChange={handleNewItemChange} 
+        fullWidth
+        margin="normal"
+        InputLabelProps={{
+          shrink: true,
+        }}
+        inputProps={{
+          min: 0, 
+          step: 1, 
+        }}
+      />
+      <TextField
+        name="stock_date"
+        label="Stock Date"
+        type="date"
+        value={(newItem.stock_date)}
+        onChange={handleNewItemChange} 
+        fullWidth
+        margin="normal"
+        InputLabelProps={{
+          shrink: true,
+        }}
+      />
+      <TextField
+        label="Expiration Date"
+        name="exp_date"
+        type="date"
+        value={(newItem.exp_date)}
+        onChange={handleNewItemChange} 
+        fullWidth
+        margin="normal"
+        InputLabelProps={{
+          shrink: true,
+        }}
+      />
+        <Button onClick={handleAddNewItem}>Add</Button>
+      </Typography>
+  </Popover>
       <TableContainer sx={{ maxHeight: 650, overflow: 'auto'  }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow sx={{ boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.1)'}}> 
-            <TableCell sx={{ verticalAlign: 'top'}}>
-            <Button
-                aria-describedby={addPopoverId}
-                variant="contained"
-                color="secondary"
-                onClick={(e) => setAddAnchorEl(e.currentTarget)}
-              >
-              <AddIcon/>
-              </Button>
-              &nbsp;&nbsp;&nbsp;Item
-              <Popover
-                id={addPopoverId}
-                open={isAddPopoverOpen}
-                anchorEl={addAnchorEl}
-                onClose={() => setAddAnchorEl(null)}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'center',
-                }}
-              >
-                <Typography sx={{ p: 2 }}>
-                <TextField
-                  name="brand"
-                  label="Brand"
-                  value={newItem.brand}
-                  onChange={handleNewItemChange}
-                  fullWidth
-                  margin="normal"
-                />
-                <TextField
-                  name="simple_name"
-                  label="Simple Name"
-                  value={newItem.simple_name}
-                  onChange={handleNewItemChange} 
-                  fullWidth
-                  margin="normal"
-                />
-                <TextField
-                  name="quantity"
-                  type="number"
-                  label="Quantity"
-                  value={newItem.quantity}
-                  onChange={handleNewItemChange} 
-                  fullWidth
-                  margin="normal"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  inputProps={{
-                    min: 0, 
-                    step: 1, 
-                  }}
-                />
-                <TextField
-                  name="stock_date"
-                  label="Stock Date"
-                  type="date"
-                  value={(newItem.stock_date)}
-                  onChange={handleNewItemChange} 
-                  fullWidth
-                  margin="normal"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-                <TextField
-                  label="Expiration Date"
-                  name="exp_date"
-                  type="date"
-                  value={(newItem.exp_date)}
-                  onChange={handleNewItemChange} 
-                  fullWidth
-                  margin="normal"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-                  <Button onClick={handleAddNewItem}>Add</Button>
-                </Typography>
-            </Popover>
-            </TableCell>
+            <TableCell>Item</TableCell>
               <TableCell align="right">Simple Name</TableCell>
               <TableCell align="right">Quantity</TableCell>
               <TableCell align="right">Stock Date</TableCell>
@@ -404,33 +446,6 @@ export function InventoryPage() {
       </TableBody>
         </Table>
       </TableContainer>
-      { !loading && (
-      <div>
-        <TextField
-          label="Search Inventory"
-          variant="outlined"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            width: '60%', 
-            marginLeft: '20px', 
-            verticalAlign: 'middle',
-            '& .MuiInputBase-root': {
-            height: '35px', 
-            '& .MuiOutlinedInput-input': { 
-            padding: '20px 14px', 
-            },
-          }
-        }}
-        />
-      </div>)}
     </div>                
   );
 }

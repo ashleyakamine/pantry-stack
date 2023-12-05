@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import Table from '@mui/material/Table';
@@ -9,6 +9,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TablePagination from '@mui/material/TablePagination';
 import LinearProgress from '@mui/material/LinearProgress';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
 
 // GraphQL query
 const GET_RECIPES = gql`
@@ -24,8 +27,9 @@ const GET_RECIPES = gql`
 export function RecipePage() {
   // Execute the query using useQuery
   const { loading, error, data } = useQuery(GET_RECIPES);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState('');
 
   if (loading) return <LinearProgress />;
   if (error) return <p>Error: {error.message}</p>;
@@ -39,9 +43,47 @@ export function RecipePage() {
     setPage(0);
   };
 
+  const filterRecipes = (recipes) => {
+    const searchTerms = searchQuery.toLowerCase().split(/,?\s+/).filter(Boolean);
+  
+    return recipes.filter((recipe) => {
+      const searchText = `${recipe.title.toLowerCase()} ${recipe.ingredients.toLowerCase()}`;
+  
+      return searchTerms.every(term => searchText.includes(term));
+    });
+  };
+  
+
   // Render the data
   return (
-    <div>
+    <div style={{ paddingTop: '20px' }}>
+      { !loading && (
+        <div>
+          <TextField
+            label="Search Recipe List"
+            variant="outlined"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              width: '60%', 
+              marginLeft: '20px', 
+              verticalAlign: 'middle',
+              '& .MuiInputBase-root': {
+              height: '35px', 
+              '& .MuiOutlinedInput-input': { 
+              padding: '20px 14px', 
+              },
+            }
+          }}
+          />
+        </div>)}
       <TableContainer>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -51,38 +93,42 @@ export function RecipePage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.recipeList
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((recipe) => (
-              <TableRow
-                key={recipe.title}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 },
-                '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)', 
-                  } }}
-              >
-                <TableCell 
-                  component="th" 
-                  scope="row" 
-                  sx={{ cursor: 'pointer' }}
+            {filterRecipes(data.recipeList)
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((recipe) => (
+                <TableRow
+                  key={recipe.title}
+                  sx={{
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }
+                  }}
                 >
-                  <a
-                    href={`https://${recipe.link}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    style={{ textDecoration: 'none',
-                     color: 'inherit',
-                      }}
-                     >
-                    {recipe.title}
-                  </a>
-                </TableCell>
-                <TableCell align="right">
-                  <a href={`https://${recipe.link}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <TableCell 
+                    component="th" 
+                    scope="row"
+                    sx={{
+                      '&:hover': {
+                        textDecoration: 'underline',
+                      }
+                    }}
+                  >
+                    <a
+                      href={`https://${recipe.link}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                      {recipe.title}
+                    </a>
+                  </TableCell>
+                  <TableCell align="right">
                     {recipe.ingredients}
-                  </a>
-                </TableCell>
-              </TableRow>
+                  </TableCell>
+                </TableRow>
             ))}
           </TableBody>
         </Table>
