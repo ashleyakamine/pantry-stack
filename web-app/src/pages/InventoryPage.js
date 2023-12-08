@@ -40,6 +40,8 @@ export function InventoryPage() {
   // INISTALIZATION
   /****************************************/
 
+  const [stockDate, setStockDate] = useState('');
+  const [expDate, setExpDate] = useState('');
   const [sortField, setSortField] = useState('brand');
   const [sortDirection, setSortDirection] = useState('asc'); 
   const [errorMessage, setErrorMessage] = useState('');
@@ -100,12 +102,23 @@ export function InventoryPage() {
   const open = Boolean(anchorPosition);
   const id = open ? 'simple-popover' : undefined;
 
-  const convertDateFormat = (dateStr) => {
-    if (!dateStr) return '';
+  const convertToMMDDYYYY = (dateStr) => {
+    if (!dateStr || !dateStr.includes('-')) return dateStr;
+  
+    const [year, month, day] = dateStr.split('-');
+    return `${month}/${day}/${year}`;
+  };
+  
+
+  const toYYYYMMDD = (dateStr) => {
+    if (!dateStr || !dateStr.includes('/')) return dateStr;
   
     const [month, day, year] = dateStr.split('/');
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   };
+  
+  
+  
 
   /****************************************/
   // HANDLES
@@ -128,25 +141,34 @@ export function InventoryPage() {
     ));
 };
 
-  const handleUpdate = async (itemId) => {
-    const item = editableRows[itemId-1];
+const handleUpdate = async (itemId) => {
+  // Find the item by its id, not by the array index
+  const item = editableRows.find(row => row.id === itemId);
 
-    try {
-      await updateInventoryItem({
-        variables: {
-          id: item.id,
-          brand: item.brand,
-          simple_name: item.simple_name,
-          quantity: item.quantity,
-          exp_date: item.exp_date,
-          stock_date: item.stock_date
-        },
-        awaitRefetchQueries: GET_INVENTORY
-      });
-    } catch (error) {
-      console.log(error)
-    }
-  };
+  if (!item) {
+    console.error("Item not found for ID:", itemId);
+    return;
+  }
+
+  console.log("Updating item:", item.brand);
+
+  try {
+    await updateInventoryItem({
+      variables: {
+        id: item.id,
+        brand: item.brand,
+        simple_name: item.simple_name,
+        quantity: item.quantity,
+        exp_date: item.exp_date,
+        stock_date: item.stock_date
+      },
+      refetchQueries: [{ query: GET_INVENTORY }]
+    });
+  } catch (error) {
+    console.error("Update error:", error);
+  }
+};
+
 
   const handleDelete = async (itemId) => {
     try {
@@ -228,8 +250,20 @@ export function InventoryPage() {
                 <SearchIcon />
               </InputAdornment>
             ),
+          
           }}
           fullWidth
+          sx={{
+              width: '60%', 
+              marginLeft: '20px', 
+              verticalAlign: 'middle',
+              '& .MuiInputBase-root': {
+              height: '45px', 
+              '& .MuiOutlinedInput-input': { 
+              padding: '20px 20px', 
+              },
+            }
+          }}
         />
       </Grid>
       <Grid item style={{ paddingRight: '90px' }}>
@@ -365,8 +399,8 @@ export function InventoryPage() {
               <TableCell>{item.brand}</TableCell>
               <TableCell align="right">{item.simple_name}</TableCell>
               <TableCell align="right">{item.quantity}</TableCell>
-              <TableCell align="right">{item.stock_date}</TableCell>
-              <TableCell align="right">{item.exp_date}</TableCell>
+              <TableCell align="right">{convertToMMDDYYYY(item.stock_date)}</TableCell>
+              <TableCell align="right">{convertToMMDDYYYY(item.exp_date)}</TableCell>
               <TableCell align="right">
                 <Button onClick={(e) => handleClick(e, item.id)}>
                   <EditIcon />
@@ -387,7 +421,7 @@ export function InventoryPage() {
                       name="brand"
                       label="Brand"
                       value={item.brand}
-                      onChange={handleNewItemChange}
+                      onChange={(e) => handleRowEdit(item.id, 'brand', e.target.value)}
                       fullWidth
                       margin="normal"
                     />
@@ -419,7 +453,7 @@ export function InventoryPage() {
                       name="stock_date"
                       label="Stock Date"
                       type="date"
-                      value={convertDateFormat(item.stock_date)}
+                      value={toYYYYMMDD(item.stock_date)}
                       onChange={(e) => handleRowEdit(item.id, 'stock_date', e.target.value)}
                       fullWidth
                       margin="normal"
@@ -430,7 +464,7 @@ export function InventoryPage() {
                     <TextField
                       label="Expiration Date"
                       type="date"
-                      value={convertDateFormat(item.exp_date)}
+                      value={toYYYYMMDD(item.exp_date)}
                       onChange={(e) => handleRowEdit(item.id, 'exp_date', e.target.value)}
                       fullWidth
                       margin="normal"

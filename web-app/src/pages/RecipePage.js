@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -63,7 +62,7 @@ export function RecipePage() {
               marginLeft: '20px', 
               verticalAlign: 'middle',
               '& .MuiInputBase-root': {
-              height: '35px', 
+              height: '45px', 
               '& .MuiOutlinedInput-input': { 
               padding: '20px 14px', 
               },
