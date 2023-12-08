@@ -42,7 +42,7 @@ export function RecipePage() {
   };
   
   return (
-    <div style={{ paddingTop: '20px' }}>
+    <div style={{ paddingTop: '20px', width: '100%' }}>
       { !loading && (
         <div>
           <TextField
@@ -120,6 +120,7 @@ export function RecipePage() {
         </Table>
       </TableContainer>
     <TablePagination
+        style={{ width: '100%' }} 
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
         count={data.recipeList.length}

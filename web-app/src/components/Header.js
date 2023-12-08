@@ -121,7 +121,7 @@ function Header() {
                 fontWeight: 700,
                 color: location.pathname === page.path ? '#000000' : '#636363',
                 '&:hover': {
-                  backgroundColor: '#efefef'
+                  backgroundColor: '#dbca8a'
                 },
                 display: 'flex', 
                 alignItems: 'center', 

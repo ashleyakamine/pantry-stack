@@ -97,7 +97,7 @@ const resolvers = {
       }));
     },
     recipeList: async () => {
-      const query = 'SELECT * FROM plu_pantry.recipes limit 200';
+      const query = 'SELECT * FROM plu_pantry.recipes limit 1000';
       const [rows] = await connection.promise().query(query);
 
       return rows;
