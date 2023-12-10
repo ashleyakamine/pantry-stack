@@ -13,7 +13,7 @@ export function HomePage() {
     <div class="about">
       <h2>About the Pantry</h2>
       <p>
-      Opperated by campus ministries, the PLU Pantry serves as a place for any students, staff, and faculty seeking assistance with any level of   
+      Operated by campus ministry, the PLU Pantry serves as a place for any students, staff, and faculty seeking assistance with any level of   
       food insecurity. The pantry offers a variety of foods provided through a partnership with Northwest Harvest. All you need is 
       your ID card to gain access to our stock of staples, fresh produce, and more. Beyond providing sustenance, the PLU Pantry fosters 
       a sense of belonging and care, creating a supportive environment where no one goes hungry. Whether you need a quick snack or face 
@@ -31,7 +31,7 @@ export function HomePage() {
         <h2>What does this site do?</h2>
         <p>
           <strong>INVENTORY:</strong> On the inventory tab, you can find a list of the current inventory of the pantry to help you find 
-          the food you need. You can search throught the current stock as well as view the number of items and the last stock date. <br></br><br></br>
+          the food you need. You can search through the current stock as well as view the number of items and the last stock date. <br></br><br></br>
           <strong>RECIPE:</strong> On the recipe tab, you can find a collection of recipes you can use as inspiration for finding what to cook with the 
           ingredients you have on hand. The recipes can be searched through by ingredient to help you narrow down the options.
         </p>
