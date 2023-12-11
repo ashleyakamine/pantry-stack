@@ -40,10 +40,8 @@ export function InventoryPage() {
   // INISTALIZATION
   /****************************************/
 
-  const [stockDate, setStockDate] = useState('');
-  const [expDate, setExpDate] = useState('');
   const [sortField, setSortField] = useState('brand');
-  const [sortDirection, setSortDirection] = useState('asc'); 
+  const [sortDirection] = useState('asc'); 
   const [errorMessage, setErrorMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [editableRows, setEditableRows] = useState([]);
@@ -117,8 +115,6 @@ export function InventoryPage() {
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   };
   
-  
-  
 
   /****************************************/
   // HANDLES
@@ -158,7 +154,7 @@ const handleUpdate = async (itemId) => {
         id: item.id,
         brand: item.brand,
         simple_name: item.simple_name,
-        quantity: item.quantity,
+        quantity: parseInt(item.quantity),
         exp_date: item.exp_date,
         stock_date: item.stock_date
       },
